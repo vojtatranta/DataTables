@@ -35,7 +35,7 @@
 	}
     else if ( typeof exports === 'object' ) {
         // Node/CommonJS
-        module.exports = factory( require( 'jquery' ) );
+        module.exports = factory( $ );
     }
 	else if ( jQuery && !jQuery.fn.dataTable ) {
 		// Define using browser globals otherwise
@@ -2083,6 +2083,8 @@
 	 */
 	function _fnReDraw( settings, holdPosition )
 	{
+        if (settings.supressLoad) return;
+
 		var
 			features = settings.oFeatures,
 			sort     = features.bSort,
@@ -3275,15 +3277,16 @@
 				column.nTh.style.width = _fnStringToCss( column.sWidth );
 			}
 		}
-	
+
 		// If there is default sorting required - let's do it. The sort function
 		// will do the drawing for us. Otherwise we draw the table regardless of the
 		// Ajax source - this allows the table to look initialised for Ajax sourcing
 		// data (show 'loading' message possibly)
 		_fnReDraw( settings );
-	
+
 		// Server-side processing init complete is done by _fnAjaxUpdateDraw
 		var dataSrc = _fnDataSource( settings );
+
 		if ( dataSrc != 'ssp' ) {
 			// if there is an ajax source load the data
 			if ( dataSrc == 'ajax' ) {
@@ -3299,7 +3302,6 @@
 					// a filter, and therefore cleared it before. So we need to make
 					// it appear 'fresh'
 					settings.iInitDisplayStart = iAjaxStart;
-	
 					_fnReDraw( settings );
 	
 					_fnProcessingDisplay( settings, false );
@@ -6177,7 +6179,7 @@
 				"bAutoWidth",
 				"bSortClasses",
 				"bServerSide",
-				"bDeferRender"
+				"bDeferRender",
 			] );
 			_fnMap( oSettings, oInit, [
 				"asStripeClasses",
@@ -6195,6 +6197,7 @@
 				"sDom",
 				"bSortCellsTop",
 				"iTabIndex",
+				"supressLoad",
 				"fnStateLoadCallback",
 				"fnStateSaveCallback",
 				"renderer",
@@ -7358,7 +7361,7 @@
 	
 	var __reload = function ( settings, holdPosition, callback ) {
 		if ( _fnDataSource( settings ) == 'ssp' ) {
-			_fnReDraw( settings, holdPosition );
+            _fnReDraw( settings, holdPosition );
 		}
 		else {
 			// Trigger xhr
@@ -12602,7 +12605,8 @@
 			 *  @type boolean
 			 */
 			"bDeferRender": null,
-	
+			
+			"supressLoad": false,
 			/**
 			 * Enable filtering on the table or not. Note that if this is disabled
 			 * then there is no filtering at all on the table, including fnFilter.
@@ -12786,6 +12790,7 @@
 	
 	
 		"ajax": null,
+		"supressLoad": false,
 	
 	
 		/**
